@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
+using AtomicTorch.CBND.CoreMod.StaticObjects.Structures.Generators;
 using AtomicTorch.CBND.CoreMod.StaticObjects.Structures.Manufacturers;
 using AtomicTorch.CBND.CoreMod.Systems.Crafting;
 using AtomicTorch.CBND.CoreMod.Systems.PowerGridSystem;
@@ -28,19 +29,29 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
 
             // please note - the order of creating these view models is important for the proper container exchange order
             this.ViewModelFuelBurningState = fuelBurningState != null
-                                                 ? new ViewModelFuelBurningState(fuelBurningState)
-                                                 : null;
+                ? new ViewModelFuelBurningState(fuelBurningState)
+                : null;
 
             this.ViewModelManufacturingState = new ViewModelManufacturingState(
                 worldObjectManufacturer,
                 manufacturingState,
                 manufacturingConfig);
 
-            viewModelManufacturerExchange = new ViewModelManufacturerExchange(
-                privateState.ManufacturingState.ContainerOutput, new List<IItemsContainer> {privateState.ManufacturingState.ContainerInput});
-
             this.ViewModelBurningFuel = ViewModelBurningFuel.Create(worldObjectManufacturer, fuelBurningState);
-          
+
+            var insertIfInputEmpty = worldObjectManufacturer.ProtoStaticWorldObject switch
+            {
+                ProtoObjectWell _ => true,
+                ProtoObjectOilPump _ => true,
+                ObjectGeneratorEngine _ => true,
+                _ => false
+            };
+
+            viewModelManufacturerExchange = new ViewModelManufacturerExchange(
+                privateState.ManufacturingState.ContainerOutput,
+                new List<IItemsContainer> {privateState.ManufacturingState.ContainerInput},
+                insertIfInputEmpty);
+
             this.ViewModelManufacturingState.SubscribePropertyChange(
                 _ => _.SelectedRecipe,
                 this.RefreshIsNeedFuel);
@@ -63,8 +74,8 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
 
             this.publicState = worldObjectManufacturer.GetPublicState<ObjectManufacturerPublicState>();
             this.publicState.ClientSubscribe(_ => _.IsActive,
-                                             _ => this.NotifyPropertyChanged(nameof(this.IsManufacturingActive)),
-                                             this);
+                _ => this.NotifyPropertyChanged(nameof(this.IsManufacturingActive)),
+                this);
         }
 
         public ViewModelWindowManufacturer()
@@ -90,13 +101,13 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
             => this.ViewModelFuelBurningState == null
                && this.WorldObjectManufacturer.ProtoStaticWorldObject is IProtoObjectElectricityConsumer protoConsumer
                && protoConsumer.ElectricityConsumptionPerSecondWhenActive > 0
-                   ? Visibility.Visible
-                   : Visibility.Collapsed;
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
         public Visibility VisibilityFuelControls
             => this.ViewModelFuelBurningState != null
-                   ? Visibility.Visible
-                   : Visibility.Collapsed;
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
         public IStaticWorldObject WorldObjectManufacturer { get; }
 
