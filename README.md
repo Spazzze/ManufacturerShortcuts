@@ -1,4 +1,4 @@
-#Manufacturer shortcuts (Working Hotkeys for all manufacturer structures)
+# Manufacturer shortcuts for CryoFall (Working Hotkeys for all manufacturer structures)
 
 Mod adds ability to use Container menu hotkeys for all manufacturer structures (stoves, furnaces, oil refinery, oil cracking plant and so on, even for mulchbox and wells!).
 
