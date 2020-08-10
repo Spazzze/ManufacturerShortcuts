@@ -39,19 +39,6 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
 
             this.ViewModelBurningFuel = ViewModelBurningFuel.Create(worldObjectManufacturer, fuelBurningState);
 
-            var insertIfInputEmpty = worldObjectManufacturer.ProtoStaticWorldObject switch
-            {
-                ProtoObjectWell _ => true,
-                ProtoObjectOilPump _ => true,
-                ObjectGeneratorEngine _ => true,
-                _ => false
-            };
-
-            viewModelManufacturerExchange = new ViewModelManufacturerExchange(
-                privateState.ManufacturingState.ContainerOutput,
-                new List<IItemsContainer> {privateState.ManufacturingState.ContainerInput},
-                insertIfInputEmpty);
-
             this.ViewModelManufacturingState.SubscribePropertyChange(
                 _ => _.SelectedRecipe,
                 this.RefreshIsNeedFuel);
@@ -76,6 +63,19 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
             this.publicState.ClientSubscribe(_ => _.IsActive,
                 _ => this.NotifyPropertyChanged(nameof(this.IsManufacturingActive)),
                 this);
+            
+            var insertIfInputEmpty = worldObjectManufacturer.ProtoStaticWorldObject switch
+            {
+                ProtoObjectWell _ => true,
+                ProtoObjectOilPump _ => true,
+                ObjectGeneratorEngine _ => true,
+                _ => false
+            };
+
+            viewModelManufacturerExchange = new ViewModelManufacturerExchange(
+                privateState.ManufacturingState.ContainerOutput,
+                new List<IItemsContainer> {privateState.ManufacturingState.ContainerInput},
+                insertIfInputEmpty);
         }
 
         public ViewModelWindowManufacturer()

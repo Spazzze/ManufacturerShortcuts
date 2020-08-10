@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AtomicTorch.CBND.CoreMod.Characters.Player;
 using AtomicTorch.CBND.CoreMod.ClientComponents.Input;
@@ -11,6 +12,7 @@ using AtomicTorch.CBND.GameApi.Data.Characters;
 using AtomicTorch.CBND.GameApi.Data.Items;
 using AtomicTorch.CBND.GameApi.Scripting;
 using AtomicTorch.CBND.GameApi.ServicesClient;
+using ManufacturerShortcuts.Scripts.ManufacturerShortcuts;
 
 namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.Data.Base
 {
@@ -20,6 +22,7 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
         private readonly List<IClientItemsContainer> inputContainers = new List<IClientItemsContainer>();
         private readonly List<IClientItemsContainer> outputContainers = new List<IClientItemsContainer>();
         private static readonly IItemsClientService ItemsService = Api.Client.Items;
+        private static readonly Lazy<string> CurrentCharacterName = new Lazy<string>(Api.Client.Characters.CurrentPlayerCharacter.Name);
         private readonly bool isInsertingWithoutMatch;
         private ClientInputContext inputListener;
         private bool isActive;
@@ -33,6 +36,7 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
             if (inputContainersList != null) inputContainers.AddRange(inputContainersList.Select(it => it as IClientItemsContainer));
             IsActive = !ItemsContainerExchangeControl.IsEnabledOnlyWhenLoaded;
             isInsertingWithoutMatch = insertIfInputEmpty;
+            if (isInsertingWithoutMatch && VeryLazyGuysList.IsLazyGuy(CurrentCharacterName.Value)) ExecuteCommandTakeAllAndMatchUp();
         }
 
         private bool IsActive
@@ -50,7 +54,8 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
                         .Start("Container exchange")
                         .HandleButtonDown(GameButton.ContainerTakeAll, ExecuteCommandTakeAll)
                         .HandleButtonDown(GameButton.ContainerMoveItemsMatchDown, ExecuteCommandMatchDown)
-                        .HandleButtonDown(GameButton.ContainerMoveItemsMatchUp, ExecuteCommandMatchUp);
+                        .HandleButtonDown(GameButton.ContainerMoveItemsMatchUp, ExecuteCommandMatchUp)
+                        .HandleButtonDown(ManufacturerShortcutsButton.ExecuteCommandTakeAllAndPutAll, ExecuteCommandTakeAllAndMatchUp);
                 }
                 else
                 {
@@ -124,6 +129,12 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
                 // it means there are not enough space
                 NotificationSystem.ClientShowNotificationNoSpaceInInventory();
             }
+        }
+
+        private void ExecuteCommandTakeAllAndMatchUp()
+        {
+            ExecuteCommandTakeAll();
+            ExecuteCommandMatch(true);
         }
 
         private void ExecuteCommandTakeAll()
