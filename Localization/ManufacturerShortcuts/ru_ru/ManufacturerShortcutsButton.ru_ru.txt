@@ -1,0 +1,2 @@
+﻿Scripts/ManufacturerShortcuts/ManufacturerShortcutsButton@ExecuteCommandTakeAllAndPutAll:
+Взять все и вложить похожие в контейнер

@@ -59,7 +59,10 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
             this.ViewModelLiquidStateProcessedMineralOil = new ViewModelLiquidContainerState(
                 liquidStateProcessedMineralOil,
                 liquidConfigProcessedMineralOil);
-
+            // prepare active state property
+            this.manufacturerPublicState = worldObject.GetPublicState<ObjectManufacturerPublicState>();
+            this.manufacturerPublicState.ClientSubscribe(_ => _.IsActive,
+                _ => NotifyPropertyChanged(nameof(IsManufacturingActive)), this);
             viewModelManufacturerExchange = new ViewModelManufacturerExchange(
                 new List<IItemsContainer>
                 {
@@ -74,13 +77,6 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
                     manufacturingStateProcessedMineralOil.ContainerInput
                 },
                 true);
-
-            // prepare active state property
-            this.manufacturerPublicState = worldObject.GetPublicState<ObjectManufacturerPublicState>();
-            this.manufacturerPublicState.ClientSubscribe(_ => _.IsActive,
-                                                         _ => this.NotifyPropertyChanged(
-                                                             nameof(this.IsManufacturingActive)),
-                                                         this);
         }
 
         public ViewModelWindowOilRefinery()

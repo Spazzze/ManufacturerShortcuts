@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
+using AtomicTorch.CBND.CoreMod.StaticObjects.Structures.Manufacturers;
+using AtomicTorch.CBND.CoreMod.Systems.Crafting;
+using AtomicTorch.CBND.CoreMod.Systems.LiquidContainer;
+using AtomicTorch.CBND.CoreMod.UI.Controls.Core;
+using AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Data;
 using AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.Data.Base;
 using AtomicTorch.CBND.GameApi.Data.Items;
+using AtomicTorch.CBND.GameApi.Data.State;
+using AtomicTorch.CBND.GameApi.Data.World;
 
 namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.Data
 {
-    using AtomicTorch.CBND.CoreMod.StaticObjects.Structures.Manufacturers;
-    using AtomicTorch.CBND.CoreMod.Systems.Crafting;
-    using AtomicTorch.CBND.CoreMod.Systems.LiquidContainer;
-    using AtomicTorch.CBND.CoreMod.UI.Controls.Core;
-    using AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Data;
-    using AtomicTorch.CBND.GameApi.Data.State;
-    using AtomicTorch.CBND.GameApi.Data.World;
-
     public class ViewModelWindowOilCrackingPlant : BaseViewModel
     {
         private readonly ObjectManufacturerPublicState manufacturerPublicState;
@@ -47,7 +46,10 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
             this.ViewModelLiquidStateProcessedGasoline = new ViewModelLiquidContainerState(
                 liquidStateProcessedGasoline,
                 liquidConfigProcessedGasoline);
-            
+            // prepare active state property
+            this.manufacturerPublicState = worldObject.GetPublicState<ObjectManufacturerPublicState>();
+            this.manufacturerPublicState.ClientSubscribe(_ => _.IsActive,
+                _ => NotifyPropertyChanged(nameof(IsManufacturingActive)), this);
             viewModelManufacturerExchange = new ViewModelManufacturerExchange(
                 new List<IItemsContainer>
                 {
@@ -60,14 +62,6 @@ namespace AtomicTorch.CBND.CoreMod.UI.Controls.Game.WorldObjects.Manufacturers.D
                     manufacturingStateProcessedGasoline.ContainerInput
                 },
                 true);
-
-
-            // prepare active state property
-            this.manufacturerPublicState = worldObject.GetPublicState<ObjectManufacturerPublicState>();
-            this.manufacturerPublicState.ClientSubscribe(_ => _.IsActive,
-                                                         _ => this.NotifyPropertyChanged(
-                                                             nameof(this.IsManufacturingActive)),
-                                                         this);
         }
 
         public ViewModelWindowOilCrackingPlant()
